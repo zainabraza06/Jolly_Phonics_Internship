@@ -28,8 +28,6 @@ import gc
 import subprocess
 import urllib.request
 
-import cv2
-import mediapipe as mp
 import noisereduce as nr
 import numpy as np
 import soundfile as sf
@@ -37,8 +35,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torchaudio
-from mediapipe.tasks import python as mp_python
-from mediapipe.tasks.python import vision as mp_vision
 from transformers import WhisperModel, WhisperProcessor
 
 from .config import (AUDIO_FEAT_DIM, HF_CACHE_DIR, MAX_AUDIO_FRAMES,
@@ -144,6 +140,9 @@ def ensure_mediapipe_assets():
 
 
 def _open_landmarkers():
+    import mediapipe as mp
+    from mediapipe.tasks import python as mp_python
+    from mediapipe.tasks.python import vision as mp_vision
     ensure_mediapipe_assets()
     def opts(cls, opt_cls, filename, **kw):
         return cls.create_from_options(opt_cls(
@@ -189,6 +188,8 @@ def _fit_to_window(arr: np.ndarray) -> tuple[np.ndarray, int]:
 
 def extract_video_sequence(video_path) -> tuple[np.ndarray, int]:
     """-> ((64, 234) float32, true_frame_count)."""
+    import cv2
+    import mediapipe as mp
     hands, pose, face = _open_landmarkers()
     cap = cv2.VideoCapture(str(video_path))
     if not cap.isOpened():
