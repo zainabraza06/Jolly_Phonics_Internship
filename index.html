@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JollyPhonics — Phoneme & Gesture Recognition | MedWalee</title>
+  
+  <!-- Modern Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    /* ── DESIGN SYSTEM & VARIABLE TOKENS ── */
+    :root {
+      --color-primary-dark: #0B2545;
+      --color-primary-medium: #134074;
+      --color-primary-light: #8DA9C4;
+      --color-bg-light: #EEF4F8;
+      --color-bg-white: #FFFFFF;
+      --color-text-dark: #1E293B;
+      --color-text-muted: #64748B;
+      --color-accent-green: #10B981;
+      --color-accent-amber: #F59E0B;
+      --color-accent-red: #EF4444;
+      --color-accent-blue: #3B82F6;
+      --font-body: 'Outfit', sans-serif;
+      --font-display: 'Fredoka', sans-serif;
+      --radius-sm: 8px;
+      --radius-md: 16px;
+      --radius-lg: 24px;
+      --shadow-sm: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+      --shadow-md: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+      --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* ── BASE STYLES ── */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: var(--font-body);
+      color: var(--color-text-dark);
+      background-color: var(--color-bg-white);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+    ul {
+      list-style: none;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background-color: var(--color-primary-dark);
+      padding: 1.25rem 5%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .logo-badge {
+      background-color: var(--color-accent-blue);
+      color: white;
+      font-family: var(--font-display);
+      font-weight: 700;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-sm);
+      font-size: 1.3rem;
+    }
+    .logo-text {
+      color: white;
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    .logo-text span {
+      color: var(--color-primary-light);
+      font-weight: 400;
+      font-size: 0.95rem;
+      margin-left: 6px;
+    }
+    nav ul {
+      display: flex;
+      gap: 2rem;
+      align-items: center;
+    }
+    nav a {
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 0.95rem;
+      font-weight: 500;
+      transition: var(--transition-smooth);
+    }
+    nav a:hover {
+      color: white;
+    }
+    .back-org {
+      font-size: 0.85rem;
+      color: var(--color-primary-light);
+      border: 1px solid rgba(141, 169, 196, 0.3);
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+    }
+    .btn-header {
+      background-color: var(--color-accent-blue);
+      color: white;
+      font-weight: 600;
+      padding: 10px 20px;
+      border-radius: 50px;
+      transition: var(--transition-smooth);
+    }
+    .btn-header:hover {
+      background-color: #2563EB;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    /* ── HERO SECTION ── */
+    .hero {
+      background: linear-gradient(135deg, var(--color-primary-dark) 0%, #06152B 100%);
+      padding: 6rem 5% 7rem 5%;
+      color: white;
+      position: relative;
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      align-items: center;
+      gap: 4rem;
+    }
+    .hero-content h1 {
+      font-family: var(--font-display);
+      font-size: 3.5rem;
+      line-height: 1.15;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+    }
+    .hero-content p {
+      font-size: 1.25rem;
+      color: rgba(255, 255, 255, 0.8);
+      margin-bottom: 2.5rem;
+      font-weight: 300;
+    }
+    .hero-actions {
+      display: flex;
+      gap: 1.25rem;
+      margin-bottom: 3rem;
+    }
+    .btn-primary {
+      background-color: var(--color-accent-blue);
+      color: white;
+      padding: 16px 32px;
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      font-size: 1.05rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: var(--transition-smooth);
+      border: none;
+      cursor: pointer;
+    }
+    .btn-primary:hover {
+      background-color: #2563EB;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(59, 130, 246, 0.25);
+    }
+    .btn-secondary {
+      border: 1.5px solid rgba(255, 255, 255, 0.3);
+      color: white;
+      padding: 16px 32px;
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      font-size: 1.05rem;
+      transition: var(--transition-smooth);
+      background: transparent;
+      cursor: pointer;
+    }
+    .btn-secondary:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+      border-color: white;
+    }
+    .hero-links {
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.5);
+      display: flex;
+      gap: 1.5rem;
+    }
+    .hero-links span {
+      color: rgba(255, 255, 255, 0.85);
+      font-weight: 500;
+    }
+
+    /* Mockup Frame */
+    .mockup-container {
+      position: relative;
+      perspective: 1000px;
+    }
+    .dashboard-mockup {
+      background-color: var(--color-bg-light);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      border: 8px solid rgba(255, 255, 255, 0.05);
+      box-shadow: var(--shadow-lg), 0 30px 60px -15px rgba(0,0,0,0.5);
+      color: var(--color-text-dark);
+      transform: rotateY(-5deg) rotateX(3deg);
+      transition: var(--transition-smooth);
+    }
+    .dashboard-mockup:hover {
+      transform: rotateY(0deg) rotateX(0deg);
+    }
+    .mock-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    }
+    .mock-title {
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--color-primary-dark);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .mock-pill {
+      background-color: rgba(16, 185, 129, 0.15);
+      color: var(--color-accent-green);
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 50px;
+    }
+    .mock-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .mock-card {
+      background-color: white;
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      box-shadow: var(--shadow-sm);
+      text-align: center;
+    }
+    .mock-number {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: var(--color-primary-medium);
+      margin-top: 4px;
+    }
+    .mock-label {
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+    .mock-gauge-wrap {
+      background: white;
+      border-radius: var(--radius-sm);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-sm);
+    }
+    .mock-ring {
+      width: 110px;
+      height: 110px;
+      position: relative;
+    }
+    .mock-ring-svg {
+      transform: rotate(-90deg);
+    }
+    .mock-ring-bg {
+      fill: none;
+      stroke: #E2E8F0;
+      stroke-width: 10;
+    }
+    .mock-ring-val {
+      fill: none;
+      stroke: var(--color-accent-green);
+      stroke-width: 10;
+      stroke-dasharray: 283;
+      stroke-dashoffset: 45; /* 84% filled */
+      stroke-linecap: round;
+      transition: var(--transition-smooth);
+    }
+    .mock-ring-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--color-text-dark);
+    }
+    .mock-ring-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--color-text-muted);
+      margin-top: 12px;
+      text-transform: uppercase;
+    }
+
+    /* ── WHAT IS SECTION ── */
+    .what-is {
+      padding: 7rem 10%;
+      background-color: #F8FAFC;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      gap: 5rem;
+    }
+    .what-is-content h2 {
+      font-family: var(--font-display);
+      font-size: 2.75rem;
+      color: var(--color-primary-dark);
+      margin-bottom: 1.5rem;
+      line-height: 1.2;
+    }
+    .what-is-content p {
+      font-size: 1.1rem;
+      color: var(--color-text-muted);
+      margin-bottom: 2rem;
+    }
+    .badge-verified {
+      background-color: var(--color-accent-amber);
+      color: white;
+      padding: 6px 16px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      border-radius: 50px;
+      display: inline-block;
+      margin-bottom: 1rem;
+      box-shadow: 0 4px 10px rgba(245, 158, 11, 0.2);
+    }
+    .what-is-card {
+      background-color: white;
+      border-radius: var(--radius-md);
+      padding: 32px;
+      box-shadow: var(--shadow-md);
+      border-left: 6px solid var(--color-accent-blue);
+    }
+    .what-is-card h3 {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      color: var(--color-primary-dark);
+      margin-bottom: 10px;
+    }
+    .what-is-card p {
+      margin: 0;
+      font-size: 0.95rem;
+    }
+
+    /* ── KEY FEATURES SECTION ── */
+    .features {
+      padding: 7rem 5%;
+      text-align: center;
+    }
+    .features-header {
+      max-width: 700px;
+      margin: 0 auto 5rem auto;
+    }
+    .features-header h2 {
+      font-family: var(--font-display);
+      font-size: 2.75rem;
+      color: var(--color-primary-dark);
+      margin-bottom: 1rem;
+    }
+    .features-header p {
+      font-size: 1.1rem;
+      color: var(--color-text-muted);
+    }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2.5rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .feature-card {
+      background-color: white;
+      border-radius: var(--radius-md);
+      padding: 40px 30px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid #F1F5F9;
+      text-align: left;
+      transition: var(--transition-smooth);
+    }
+    .feature-card:hover {
+      transform: translateY(-8px);
+      box-shadow: var(--shadow-lg);
+      border-color: rgba(19, 64, 116, 0.1);
+    }
+    .feature-icon {
+      background-color: rgba(19, 64, 116, 0.05);
+      color: var(--color-primary-medium);
+      width: 60px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-sm);
+      font-size: 1.75rem;
+      margin-bottom: 24px;
+      transition: var(--transition-smooth);
+    }
+    .feature-card:hover .feature-icon {
+      background-color: var(--color-primary-medium);
+      color: white;
+    }
+    .feature-card h3 {
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      color: var(--color-primary-dark);
+      margin-bottom: 12px;
+    }
+    .feature-card p {
+      font-size: 0.95rem;
+      color: var(--color-text-muted);
+    }
+
+    /* ── INTERACTIVE SIMULATOR SECTION ── */
+    .simulator-sec {
+      padding: 7rem 5%;
+      background-color: #F8FAFC;
+      border-top: 1px solid #E2E8F0;
+      border-bottom: 1px solid #E2E8F0;
+    }
+    .simulator-sec h2 {
+      font-family: var(--font-display);
+      font-size: 2.75rem;
+      color: var(--color-primary-dark);
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    .simulator-sec p.subtitle {
+      font-size: 1.1rem;
+      color: var(--color-text-muted);
+      text-align: center;
+      margin-bottom: 4rem;
+    }
+    .simulator-container {
+      max-width: 1000px;
+      margin: 0 auto;
+      background: white;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      border: 1px solid #E2E8F0;
+    }
+    .sim-controls {
+      padding: 40px;
+      border-right: 1px solid #E2E8F0;
+    }
+    .sim-panel {
+      padding: 40px;
+      background-color: #FAFBFD;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .sim-section-title {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      color: var(--color-primary-dark);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .phoneme-selector {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 30px;
+    }
+    .phoneme-btn {
+      background-color: #F1F5F9;
+      border: 2px solid transparent;
+      padding: 10px;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.1rem;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      text-align: center;
+      transition: var(--transition-smooth);
+    }
+    .phoneme-btn:hover {
+      background-color: #E2E8F0;
+    }
+    .phoneme-btn.active {
+      background-color: rgba(59, 130, 246, 0.1);
+      border-color: var(--color-accent-blue);
+      color: var(--color-accent-blue);
+    }
+    .quality-selector {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 35px;
+    }
+    .quality-option {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 18px;
+      border: 1.5px solid #E2E8F0;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: var(--transition-smooth);
+    }
+    .quality-option:hover {
+      background-color: #F8FAFC;
+    }
+    .quality-option.active {
+      border-color: var(--color-accent-blue);
+      background-color: rgba(59, 130, 246, 0.03);
+    }
+    .quality-radio {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 2.5px solid #CBD5E1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition-smooth);
+    }
+    .quality-option.active .quality-radio {
+      border-color: var(--color-accent-blue);
+    }
+    .quality-option.active .quality-radio::after {
+      content: '';
+      width: 8px;
+      height: 8px;
+      background-color: var(--color-accent-blue);
+      border-radius: 50%;
+    }
+    .quality-details {
+      display: flex;
+      flex-direction: column;
+    }
+    .quality-title {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--color-text-dark);
+    }
+    .quality-desc {
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+    }
+    .sim-btn-eval {
+      width: 100%;
+      background-color: var(--color-primary-dark);
+      color: white;
+      border: none;
+      padding: 16px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      font-family: var(--font-display);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: var(--transition-smooth);
+    }
+    .sim-btn-eval:hover {
+      background-color: var(--color-primary-medium);
+      box-shadow: var(--shadow-md);
+    }
+    .gauge-card {
+      background: white;
+      border: 1px solid #E2E8F0;
+      border-radius: var(--radius-md);
+      padding: 30px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      box-shadow: var(--shadow-sm);
+    }
+    .sim-status-banner {
+      width: 100%;
+      text-align: center;
+      padding: 10px;
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .banner-correct {
+      background-color: rgba(16, 185, 129, 0.12);
+      color: var(--color-accent-green);
+    }
+    .banner-mismatch {
+      background-color: rgba(239, 68, 68, 0.12);
+      color: var(--color-accent-red);
+    }
+    .sim-metrics {
+      width: 100%;
+      margin-top: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      border-top: 1px dashed #E2E8F0;
+      padding-top: 20px;
+    }
+    .sim-metric-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.9rem;
+    }
+    .sim-metric-name {
+      color: var(--color-text-muted);
+      font-weight: 500;
+    }
+    .sim-metric-val {
+      color: var(--color-text-dark);
+      font-weight: 700;
+    }
+
+    /* ── DEPLOYMENT SECTION ── */
+    .deploy-section {
+      padding: 7rem 10%;
+      background: linear-gradient(135deg, #091C35 0%, var(--color-primary-dark) 100%);
+      color: white;
+      display: grid;
+      grid-template-columns: 1fr 1.1fr;
+      align-items: center;
+      gap: 5rem;
+    }
+    .deploy-content h2 {
+      font-family: var(--font-display);
+      font-size: 2.75rem;
+      margin-bottom: 1.5rem;
+      line-height: 1.2;
+    }
+    .deploy-content p {
+      font-size: 1.15rem;
+      color: rgba(255,255,255,0.8);
+      margin-bottom: 2rem;
+    }
+    .deploy-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    .deploy-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: var(--radius-md);
+      padding: 28px;
+      display: flex;
+      align-items: flex-start;
+      gap: 20px;
+      transition: var(--transition-smooth);
+    }
+    .deploy-card:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+    .deploy-badge {
+      background-color: var(--color-accent-blue);
+      color: white;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .deploy-card-details h3 {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      margin-bottom: 6px;
+    }
+    .deploy-card-details p {
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.65);
+      margin: 0;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      background-color: var(--color-primary-dark);
+      color: rgba(255, 255, 255, 0.5);
+      padding: 3rem 5%;
+      text-align: center;
+      font-size: 0.9rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    footer a {
+      color: rgba(255, 255, 255, 0.8);
+      margin: 0 10px;
+      transition: var(--transition-smooth);
+    }
+    footer a:hover {
+      color: white;
+    }
+    .footer-copy {
+      margin-top: 1.5rem;
+      font-size: 0.8rem;
+    }
+
+    /* ── RESPONSIVE DESIGN ── */
+    @media (max-width: 1024px) {
+      .hero, .what-is, .deploy-section {
+        grid-template-columns: 1fr;
+        gap: 3rem;
+      }
+      .features-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+      .simulator-container {
+        grid-template-columns: 1fr;
+      }
+      .sim-controls {
+        border-right: none;
+        border-bottom: 1px solid #E2E8F0;
+      }
+    }
+    @media (max-width: 640px) {
+      .features-grid {
+        grid-template-columns: 1fr;
+      }
+      .hero-content h1 {
+        font-size: 2.5rem;
+      }
+      .hero-actions {
+        flex-direction: column;
+      }
+      nav ul {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="logo">
+      <div class="logo-badge">JP</div>
+      <div class="logo-text">JollyPhonics<span>by MedWalee</span></div>
+    </div>
+    <nav>
+      <ul>
+        <li><a href="#features">Features</a></li>
+        <li><a href="#simulator">Interactive Demo</a></li>
+        <li><a href="#deploy">Infrastructure</a></li>
+        <li><a href="https://medwalee.com" class="back-org">← medwalee</a></li>
+        <li><a href="#simulator" class="btn-header">Try Scorer</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- HERO SECTION -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1>Advanced Real-Time Phoneme & Gesture Recognition</h1>
+      <p>A cutting-edge deep learning pipeline combining Whisper acoustic encoding and MediaPipe joint coordinate tracking to evaluate child speech and gestures in one unified pass.</p>
+      
+      <div class="hero-actions">
+        <a href="#simulator" class="btn-primary">
+          Try Live Demo Scorer
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+        <a href="https://github.com/zainabraza06/Jolly_Phonics_Internship.git" target="_blank" class="btn-secondary">View on GitHub</a>
+      </div>
+
+      <div class="hero-links">
+        <div>HF Hub: <span>zainabraza06/phenome_classfication</span></div>
+        <div>Render URL: <span>phenome-classification-model.onrender.com</span></div>
+      </div>
+    </div>
+    
+    <div class="mockup-container">
+      <div class="dashboard-mockup">
+        <div class="mock-header">
+          <div class="mock-title">
+            <svg width="20" height="20" fill="none" stroke="var(--color-accent-blue)" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/></svg>
+            JollyPhonics Dashboard
+          </div>
+          <div class="mock-pill">Live Connection</div>
+        </div>
+        
+        <div class="mock-grid">
+          <div class="mock-card">
+            <div class="mock-label">Selected Phoneme</div>
+            <div class="mock-number">ai</div>
+          </div>
+          <div class="mock-card">
+            <div class="mock-label">Classifier Match</div>
+            <div class="mock-number" style="color: var(--color-accent-green);">YES</div>
+          </div>
+        </div>
+        
+        <div class="mock-gauge-wrap">
+          <div class="mock-ring">
+            <svg class="mock-ring-svg" width="110" height="110">
+              <circle class="mock-ring-bg" cx="55" cy="55" r="45"/>
+              <circle class="mock-ring-val" cx="55" cy="55" r="45"/>
+            </svg>
+            <div class="mock-ring-text">84%</div>
+          </div>
+          <div class="mock-ring-label">Overall Accuracy Score</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHAT IS SECTION -->
+  <section class="what-is" id="about">
+    <div class="mockup-container">
+      <!-- MediaPipe Mesh Mockup -->
+      <div class="dashboard-mockup" style="background-color: var(--color-primary-dark); color: white; transform: rotateY(5deg) rotateX(2deg);">
+        <div class="mock-header" style="border-bottom-color: rgba(255,255,255,0.1);">
+          <div class="mock-title" style="color: white;">
+            <svg width="20" height="20" fill="none" stroke="var(--color-accent-amber)" stroke-width="2" viewBox="0 0 24 24"><path d="M15 10l5 5-5 5M9 14l-5-5 5-5"/></svg>
+            Landmark Coordinate Mapping
+          </div>
+          <span style="font-size: 0.75rem; color: var(--color-primary-light);">MediaPipe Vision</span>
+        </div>
+        <div style="background: rgba(255, 255, 255, 0.05); height: 180px; border-radius: var(--radius-sm); position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+          <!-- SVG Mock Face Mesh -->
+          <svg width="200" height="150" viewBox="0 0 200 150">
+            <!-- Face Contour -->
+            <path d="M70,30 Q100,20 130,30 Q150,70 130,110 Q100,130 70,110 Q50,70 70,30 Z" fill="none" stroke="rgba(255, 255, 255, 0.15)" stroke-width="1.5" stroke-dasharray="3 3"/>
+            <!-- Active Mouth landmarks -->
+            <path d="M85,85 Q100,75 115,85 Q100,95 85,85 Z" fill="none" stroke="var(--color-accent-amber)" stroke-width="2"/>
+            <!-- Points representing landmark nodes -->
+            <circle cx="85" cy="85" r="4" fill="var(--color-accent-amber)"/>
+            <circle cx="100" cy="75" r="4" fill="var(--color-accent-amber)"/>
+            <circle cx="115" cy="85" r="4" fill="var(--color-accent-amber)"/>
+            <circle cx="100" cy="95" r="4" fill="var(--color-accent-amber)"/>
+            <circle cx="92" cy="81" r="3" fill="#3B82F6"/>
+            <circle cx="108" cy="81" r="3" fill="#3B82F6"/>
+            
+            <!-- Hand Mesh -->
+            <path d="M140,120 L150,90 L160,85 L170,95 L165,120 Z" fill="none" stroke="rgba(16, 185, 129, 0.4)" stroke-width="1.5"/>
+            <circle cx="150" cy="90" r="3.5" fill="var(--color-accent-green)"/>
+            <circle cx="160" cy="85" r="3.5" fill="var(--color-accent-green)"/>
+          </svg>
+          <div style="position: absolute; bottom: 10px; right: 10px; font-size: 0.7rem; background: rgba(0,0,0,0.6); padding: 2px 8px; border-radius: 4px; color: var(--color-accent-green);">Normalized width = 1.0</div>
+        </div>
+        <div style="margin-top: 15px; font-size: 0.8rem; color: rgba(255,255,255,0.7); text-align: center;">Body-Relative Normalization to Shoulder Midpoint</div>
+      </div>
+    </div>
+    
+    <div class="what-is-content">
+      <div class="badge-verified">Multi-Modal Fusion Pipeline</div>
+      <h2>What is JollyPhonics?</h2>
+      <p>JollyPhonics is a premium, real-time feedback tool for young learners. By capturing both audio articulation (phonemes) and hand/face gestures (kinesthetic cues), it calculates exact feedback metrics comparing child attempts against validated target templates.</p>
+      
+      <div class="what-is-card">
+        <h3>Why Audio + Gestures?</h3>
+        <p>Phonics instruction for children relies heavily on physical gestures (e.g., placing hands to cheeks for 'ai'). Combining these modalities increases phoneme classification accuracy and guarantees a holistic learning environment.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES GRID -->
+  <section class="features" id="features">
+    <div class="features-header">
+      <h2>The core technologies powering JollyPhonics</h2>
+      <p>By shifting computational load dynamically, we support instant web analysis without heavy container initialization costs.</p>
+    </div>
+    
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🎙️</div>
+        <h3>Whisper Encoder</h3>
+        <p>Utilizes a softmax-weighted sum across layers [1, 3, 5, 7, 9] of the Whisper-small encoder, isolating acoustic properties directly from raw audio waveforms.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">✨</div>
+        <h3>MediaPipe Vision</h3>
+        <p>Extracts 234-dimensional joint arrays representing mouth boundaries, poses, and hands, enabling fine-grained posture tracking.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <h3>Cross-Attention Fusion</h3>
+        <p>Fuses sequence modalities at the latent layer via Cross-Attention layers, mapping sound parameters directly to physical actions.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- INTERACTIVE SIMULATOR SECTION -->
+  <section class="simulator-sec" id="simulator">
+    <h2>Interactive Scorer Simulator</h2>
+    <p class="subtitle">Simulate real-time articulation tests to experience how composite self-calibrated thresholds score attempts.</p>
+    
+    <div class="simulator-container">
+      <div class="sim-controls">
+        <div class="sim-section-title">
+          <span>1.</span> Select Expected Phoneme
+        </div>
+        <div class="phoneme-selector">
+          <button class="phoneme-btn active" onclick="selectPhoneme('ai')">ai</button>
+          <button class="phoneme-btn" onclick="selectPhoneme('qu')">qu</button>
+          <button class="phoneme-btn" onclick="selectPhoneme('y')">y</button>
+          <button class="phoneme-btn" onclick="selectPhoneme('z')">z</button>
+          <button class="phoneme-btn" onclick="selectPhoneme('g')">g</button>
+          <button class="phoneme-btn" onclick="selectPhoneme('s')">s</button>
+          <button class="phoneme-btn" onclick="selectPhoneme('ck')">c-k</button>
+        </div>
+        
+        <div class="sim-section-title">
+          <span>2.</span> Select Articulation Quality
+        </div>
+        <div class="quality-selector">
+          <div class="quality-option active" onclick="selectQuality('perfect')">
+            <div class="quality-radio"></div>
+            <div class="quality-details">
+              <span class="quality-title">Perfect Pronunciation</span>
+              <span class="quality-desc">Clear speech match and precise gesture delivery.</span>
+            </div>
+          </div>
+          <div class="quality-option" onclick="selectQuality('poor-gesture')">
+            <div class="quality-radio"></div>
+            <div class="quality-details">
+              <span class="quality-title">Poor Gesture / Hands Out of Frame</span>
+              <span class="quality-desc">Acoustic matches perfectly, but the body mapping deviates.</span>
+            </div>
+          </div>
+          <div class="quality-option" onclick="selectQuality('mismatch')">
+            <div class="quality-radio"></div>
+            <div class="quality-details">
+              <span class="quality-title">Incorrect Phoneme Articulation</span>
+              <span class="quality-desc">Learner says a different sound (e.g. 's' instead of 'ai').</span>
+            </div>
+          </div>
+        </div>
+        
+        <button class="sim-btn-eval" onclick="calculateScore()">
+          Evaluate Attempt
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+      
+      <div class="sim-panel">
+        <div class="gauge-card">
+          <div id="sim-banner" class="sim-status-banner banner-correct">
+            <span id="sim-banner-icon">✓</span>
+            <span id="sim-banner-text">Correct Phoneme Match</span>
+          </div>
+          
+          <div class="mock-ring" style="width: 140px; height: 140px;">
+            <svg class="mock-ring-svg" width="140" height="140">
+              <circle class="mock-ring-bg" cx="70" cy="70" r="60" style="stroke-width: 12;"/>
+              <circle id="sim-ring-value" class="mock-ring-val" cx="70" cy="70" r="60" style="stroke-width: 12; stroke-dasharray: 377; stroke-dashoffset: 60;"/>
+            </svg>
+            <div id="sim-score-text" class="mock-ring-text" style="font-size: 2.2rem;">84%</div>
+          </div>
+          <div class="mock-ring-label" style="margin-top: 16px;">Overall Score</div>
+          
+          <div class="sim-metrics">
+            <div class="sim-metric-row">
+              <span class="sim-metric-name">Reference Closeness (60%)</span>
+              <span id="sim-metric-ref" class="sim-metric-val">88%</span>
+            </div>
+            <div class="sim-metric-row">
+              <span class="sim-metric-name">Classifier Confidence (40%)</span>
+              <span id="sim-metric-conf" class="sim-metric-val">78%</span>
+            </div>
+            <div class="sim-metric-row" style="border-top: 1px solid #F1F5F9; padding-top: 8px; margin-top: 8px;">
+              <span class="sim-metric-name" style="color: var(--color-text-dark); font-weight: 700;">Result</span>
+              <span id="sim-metric-verdict" class="sim-metric-val" style="color: var(--color-accent-green);">Excellent</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DEPLOYMENT AND ARCHITECTURE SECTION -->
+  <section class="deploy-section" id="deploy">
+    <div class="deploy-content">
+      <h2>Serverless & Light Cloud Architecture</h2>
+      <p>JollyPhonics splits concerns between static application containers and asset servers. By decoupling the model weights from the Git tree, the slug size remains under limits, ensuring fast deployments.</p>
+      
+      <div style="margin-top: 2rem;">
+        <span style="font-size: 0.8rem; text-transform: uppercase; color: var(--color-primary-light); font-weight: 700; letter-spacing: 1px;">Deploy Details</span>
+        <div style="font-family: monospace; background: rgba(0,0,0,0.2); padding: 16px; border-radius: var(--radius-sm); font-size: 0.85rem; border: 1px solid rgba(255,255,255,0.05); margin-top: 8px;">
+          Build Command: pip install -r requirements.txt<br>
+          Start Command: uvicorn main:app --host 0.0.0.0 --port $PORT<br>
+          Locked Version: python-3.10.13
+        </div>
+      </div>
+    </div>
+    
+    <div class="deploy-actions-wrap">
+      <div class="deploy-cards">
+        <div class="deploy-card">
+          <div class="deploy-badge">HuggingFace</div>
+          <div class="deploy-card-details">
+            <h3>zainabraza06/phenome_classfication</h3>
+            <p>Model weights (.pth) and calibration distributions (.pkl) are downloaded on demand on first application lifecycle hook.</p>
+          </div>
+        </div>
+        <div class="deploy-card">
+          <div class="deploy-badge">Render</div>
+          <div class="deploy-card-details">
+            <h3>phenome-classification-model.onrender.com</h3>
+            <p>Live REST endpoints with full CORS headers integrated into Expo Mobile and Next.js Frontend clients.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>Powered by the MedWalee Engineering Team</p>
+    <div style="margin-top: 1rem;">
+      <a href="https://medwalee.com" target="_blank">medwalee.com</a> | 
+      <a href="https://github.com/zainabraza06/Jolly_Phonics_Internship.git" target="_blank">GitHub</a> | 
+      <a href="https://huggingface.co/zainabraza06/phenome_classfication" target="_blank">Hugging Face</a>
+    </div>
+    <div class="footer-copy">© 2026 MedWalee. All rights reserved.</div>
+  </footer>
+
+  <!-- SIMULATOR LOGIC -->
+  <script>
+    let currentPhoneme = 'ai';
+    let currentQuality = 'perfect';
+
+    function selectPhoneme(phoneme) {
+      document.querySelectorAll('.phoneme-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.innerText.toLowerCase().replace('-', '') === phoneme) {
+          btn.classList.add('active');
+        }
+      });
+      currentPhoneme = phoneme;
+    }
+
+    function selectQuality(quality) {
+      document.querySelectorAll('.quality-option').forEach(opt => {
+        opt.classList.remove('active');
+      });
+      event.currentTarget.classList.add('active');
+      currentQuality = quality;
+    }
+
+    function calculateScore() {
+      const ring = document.getElementById('sim-ring-value');
+      const scoreText = document.getElementById('sim-score-text');
+      const refMetric = document.getElementById('sim-metric-ref');
+      const confMetric = document.getElementById('sim-metric-conf');
+      const verdictMetric = document.getElementById('sim-metric-verdict');
+      const banner = document.getElementById('sim-banner');
+      const bannerIcon = document.getElementById('sim-banner-icon');
+      const bannerText = document.getElementById('sim-banner-text');
+
+      let refScore = 0;
+      let confScore = 0;
+      let overall = 0;
+      let isCorrect = true;
+
+      if (currentQuality === 'perfect') {
+        refScore = Math.floor(Math.random() * 8) + 90; // 90-97
+        confScore = Math.floor(Math.random() * 8) + 88; // 88-95
+        overall = Math.round(0.6 * refScore + 0.4 * confScore);
+      } else if (currentQuality === 'poor-gesture') {
+        refScore = Math.floor(Math.random() * 10) + 52; // 52-61 (decent audio closeness, poor visual)
+        confScore = Math.floor(Math.random() * 10) + 82; // 82-91 (still classified correct)
+        overall = Math.round(0.6 * refScore + 0.4 * confScore);
+      } else {
+        isCorrect = false;
+        refScore = 0;
+        confScore = 0;
+        overall = 0;
+      }
+
+      // Update banner states
+      if (isCorrect) {
+        banner.className = "sim-status-banner banner-correct";
+        bannerIcon.innerText = "✓";
+        bannerText.innerText = "Correct Phoneme Match";
+        verdictMetric.style.color = "var(--color-accent-green)";
+        if (overall >= 85) verdictMetric.innerText = "Excellent";
+        else if (overall >= 70) verdictMetric.innerText = "Good";
+        else verdictMetric.innerText = "Needs Practice";
+        
+        refMetric.innerText = refScore + "%";
+        confMetric.innerText = confScore + "%";
+      } else {
+        banner.className = "sim-status-banner banner-mismatch";
+        bannerIcon.innerText = "✗";
+        bannerText.innerText = `Incorrect Match (Sounded like '${currentPhoneme === 'ai' ? 's' : 'ai'}')`;
+        verdictMetric.style.color = "var(--color-accent-red)";
+        verdictMetric.innerText = "Mismatch";
+        
+        refMetric.innerText = "0%";
+        confMetric.innerText = "0%";
+      }
+
+      // Animate SVG Ring (Circumference is 377 for r=60)
+      const maxOffset = 377;
+      const offset = maxOffset - (maxOffset * (overall / 100));
+      
+      ring.style.strokeDashoffset = offset;
+      scoreText.innerText = overall + "%";
+
+      if (overall >= 80) {
+        ring.style.stroke = "var(--color-accent-green)";
+      } else if (overall >= 50) {
+        ring.style.stroke = "var(--color-accent-amber)";
+      } else {
+        ring.style.stroke = "var(--color-accent-red)";
+      }
+    }
+
+    // Trigger initial calculation
+    calculateScore();
+  </script>
+</body>
+</html>
