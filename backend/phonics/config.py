@@ -60,6 +60,42 @@ MEDIAPIPE_ASSETS = {
 }
 
 
+def ensure_model_assets():
+    """Ensure model.pth and reference_stats.pkl are present.
+    If missing, downloads them from Hugging Face Hub.
+    """
+    MODEL_EXPORT_DIR.mkdir(parents=True, exist_ok=True)
+    required_files = {
+        "model.pth": MODEL_WEIGHTS,
+        "reference_stats.pkl": REF_STATS_PATH,
+    }
+    missing = [name for name, path in required_files.items() if not path.exists() or path.stat().st_size == 0]
+    if missing:
+        repo_id = os.getenv("HF_REPO_ID", "zainabraza06/phenome_classfication")
+        token = os.getenv("HF_TOKEN")
+        print(f"Downloading missing model assets {missing} from Hugging Face Hub: {repo_id}...")
+        try:
+            from huggingface_hub import hf_hub_download
+            import shutil
+            for name in missing:
+                dest = required_files[name]
+                temp_path = hf_hub_download(
+                    repo_id=repo_id,
+                    filename=name,
+                    token=token,
+                    cache_dir=str(HF_CACHE_DIR)
+                )
+                shutil.copy(temp_path, dest)
+                print(f"Successfully downloaded and copied {name} to {dest}")
+        except Exception as e:
+            print(f"Failed to download from Hugging Face Hub: {e}")
+            if "model.pth" in missing:
+                raise FileNotFoundError(
+                    f"Could not load required model weights model.pth locally or from Hugging Face Hub. "
+                    "Please verify HF_REPO_ID is correct and the file exists."
+                ) from e
+
+
 def load_model_config() -> dict:
     """Read the exported config and check it against the constants above.
 
@@ -67,6 +103,7 @@ def load_model_config() -> dict:
     geometry than this code produces, which yields confident nonsense
     rather than an error -- so it is worth surfacing loudly.
     """
+    ensure_model_assets()
     if not MODEL_CONFIG.exists():
         return {}
     with open(MODEL_CONFIG) as fh:
