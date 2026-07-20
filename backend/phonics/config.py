@@ -33,7 +33,7 @@ PROJECT_DIR = BACKEND_DIR.parent
 
 MODEL_EXPORT_DIR = Path(os.getenv(
     "PHONICS_MODEL_DIR",
-    PROJECT_DIR / "app_integration" / "model_export"))
+    BACKEND_DIR / "models"))
 
 MODEL_WEIGHTS   = MODEL_EXPORT_DIR / "model.pth"
 LABEL_MAP_PATH  = MODEL_EXPORT_DIR / "label_map.json"
