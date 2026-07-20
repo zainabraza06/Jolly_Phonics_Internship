@@ -1,0 +1,69 @@
+# ── Frontend ──────────────────────────────────────────────────────────────────
+node_modules/
+.expo/
+dist/
+build/
+.next/
+out/
+
+# ── Python / Backend ──────────────────────────────────────────────────────────
+venv/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# ── Secrets ───────────────────────────────────────────────────────────────────
+.env
+.env.local
+.env.*
+secrets.py
+
+# ── Heavy AI / ML assets (hosted on HuggingFace / GDrive, not in git) ─────────
+*.pth
+*.pt
+*.onnx
+*.pkl
+*.bin
+*.safetensors
+*.zip
+*.h5
+*.pb
+
+# HuggingFace model cache (very large, auto-downloaded at runtime)
+hf_cache/
+**/hf_cache/
+models--*/
+**/models--*/
+app_integration/model_export/hf_cache/
+app_integration/model_export/*.pth
+app_integration/model_export/*.pt
+app_integration/model_export/*.pkl
+
+# MediaPipe downloaded task models
+mp_models/
+**/mp_models/
+*.task
+
+# Generated / runtime data
+output/
+backend/ai_models/
+backend/classification_results/
+backend/landmark_cache/
+backend/processed_audio/
+backend/uploaded_audios/
+backend/accuracy/
+uploaded_audios/
+tmp_pipeline/
+whisper_features/
+sound_data_collection/
+
+# ── System / IDE ──────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo

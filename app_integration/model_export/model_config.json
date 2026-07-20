@@ -1,0 +1,24 @@
+{
+  "num_classes": 7,
+  "fusion_type": "cross_attn",
+  "video_arch": "bilstm_attn",
+  "whisper_model": "openai/whisper-small",
+  "whisper_layers": [
+    1,
+    3,
+    5,
+    7,
+    9
+  ],
+  "audio_bilstm_hidden": 512,
+  "audio_bilstm_layers": 2,
+  "video_bilstm_hidden": 128,
+  "video_bilstm_layers": 1,
+  "cross_attn_proj_dim": 256,
+  "cross_attn_heads": 4,
+  "classifier_hidden": 256,
+  "classifier_dropout": 0.3,
+  "video_feat_dim": 234,
+  "video_frames": 64,
+  "audio_max_frames": 200
+}

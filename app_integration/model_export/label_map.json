@@ -1,0 +1,20 @@
+{
+  "label_to_id": {
+    "ai first letter of gp 04": 0,
+    "c-k first letter of group 02": 1,
+    "g first letter of gp 03": 2,
+    "qu first letter of gp 07": 3,
+    "s first letter of gp 01": 4,
+    "y first letter of gp 06": 5,
+    "z first letter of gp 05": 6
+  },
+  "id_to_label": {
+    "0": "ai first letter of gp 04",
+    "1": "c-k first letter of group 02",
+    "2": "g first letter of gp 03",
+    "3": "qu first letter of gp 07",
+    "4": "s first letter of gp 01",
+    "5": "y first letter of gp 06",
+    "6": "z first letter of gp 05"
+  }
+}

@@ -1,0 +1,207 @@
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  TextInput,
+  Dimensions,
+  SafeAreaView,
+  Alert,
+  ActivityIndicator,
+} from 'react-native';
+import { useAuth } from '../contexts/AuthContext';
+import { getErrorMessage } from '../services/firebase';
+
+const { width, height } = Dimensions.get('window');
+
+const SignUpScreen = ({ navigation }) => {
+  const [email, setEmail] = useState('');
+  const [displayName, setDisplayName] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const { signUp, clearError } = useAuth();
+
+  const handleSignUp = async () => {
+    if (!email.trim()) {
+      Alert.alert('Error', 'Please enter your email address');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      clearError();
+      await signUp(email.trim(), displayName.trim());
+      navigation.navigate('SignUpSuccess');
+    } catch (error) {
+      const errorMessage = getErrorMessage(error);
+      Alert.alert('Sign Up Failed', errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleBack = () => {
+    navigation.goBack();
+  };
+
+  return (
+    <SafeAreaView style={styles.container}>
+      {/* Back Button */}
+      <TouchableOpacity style={styles.backButton} onPress={handleBack}>
+        <View style={styles.backIcon}>
+          <Text style={styles.backArrow}>←</Text>
+        </View>
+      </TouchableOpacity>
+
+      {/* Sign Up Form Card */}
+      <View style={styles.formCard}>
+        <Text style={styles.title}>Sign up</Text>
+
+        {/* Email Field */}
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Email Address</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter your email"
+            placeholderTextColor="#999"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
+        </View>
+
+        {/* Display Name Field */}
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Display Name (Optional)</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter your display name"
+            placeholderTextColor="#999"
+            value={displayName}
+            onChangeText={setDisplayName}
+            autoCapitalize="words"
+          />
+        </View>
+
+        {/* Sign Up Button */}
+        <TouchableOpacity 
+          style={[styles.signUpButton, loading && styles.signUpButtonDisabled]} 
+          onPress={handleSignUp}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#fff" size="small" />
+          ) : (
+            <Text style={styles.signUpButtonText}>Sign up</Text>
+          )}
+        </TouchableOpacity>
+
+        {/* Info Text */}
+        <Text style={styles.infoText}>
+          Your email will be used as your unique identifier. No password required.
+        </Text>
+      </View>
+    </SafeAreaView>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#2D479D',
+  },
+  backButton: {
+    position: 'absolute',
+    top: 60,
+    left: 20,
+    zIndex: 1,
+  },
+  backIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'white',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'white',
+  },
+  backArrow: {
+    width: 40,
+    height: 40,
+    fontSize:30,
+    textAlign: 'center',
+    lineHeight: 40,
+    color: '#2D479D',
+    fontWeight: 'bold',
+    color: 'black',
+    fontWeight: 'bold',
+  },
+  formCard: {
+    position: 'absolute',
+    top: '50%',
+    left: 20,
+    right: 20,
+    backgroundColor: '#F5F5F5',
+    borderRadius: 20,
+    padding: 20,
+    paddingTop: 30,
+    paddingBottom: 30,
+    minHeight: height * 0.5,
+    justifyContent: 'center',
+    transform: [{ translateY: -height * 0.25 }],
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#000',
+    textAlign: 'center',
+    marginBottom: 25,
+  },
+  inputContainer: {
+    marginBottom: 18,
+  },
+  label: {
+    fontSize: 16,
+    color: '#000',
+    marginBottom: 8,
+    fontWeight: '500',
+  },
+  input: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    fontSize: 16,
+    borderWidth: 1,
+    borderColor: '#2D479D',
+    color: '#000',
+  },
+  signUpButton: {
+    backgroundColor: '#2D479D',
+    borderRadius: 12,
+    paddingVertical: 14,
+    marginTop: 15,
+    marginBottom: 15,
+    alignItems: 'center',
+  },
+  signUpButtonDisabled: {
+    backgroundColor: '#ccc',
+  },
+  signUpButtonText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  infoText: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
+    marginTop: 10,
+    fontStyle: 'italic',
+  },
+});
+
+export default SignUpScreen;
