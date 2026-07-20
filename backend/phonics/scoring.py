@@ -69,7 +69,7 @@ def score_against_reference(audio_pooled: np.ndarray,
         dist = float(np.linalg.norm(audio_pooled - reference["audio_vec"]))
         audio = distance_to_score(dist, reference["audio_good"],
                                   reference["audio_max"], reference["audio_bad"])
-    if video_pooled is not None and reference.get("lm_vec") is not None:
+    if reference.get("lm_vec") is not None:
         dist = float(np.linalg.norm(video_pooled - reference["lm_vec"]))
         gesture = distance_to_score(dist, reference["lm_good"],
                                     reference["lm_max"], reference["lm_bad"])

@@ -12,13 +12,8 @@ Model architecture, feature extraction and scoring live in the `phonics`
 package; this module is transport and orchestration only.
 """
 
-import os
-# Restrict PyTorch thread limits before loading any models
-import torch
-torch.set_num_threads(1)
-torch.set_num_interop_threads(1)
-
 import logging
+import os
 import shutil
 import tempfile
 from contextlib import asynccontextmanager

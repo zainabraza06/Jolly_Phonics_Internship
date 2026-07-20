@@ -38,18 +38,12 @@ MODEL_EXPORT_DIR = Path(os.getenv(
     "PHONICS_MODEL_DIR",
     BACKEND_DIR / "models"))
 
-MODEL_WEIGHTS        = MODEL_EXPORT_DIR / "model.pth"          # fusion model
-AUDIO_MODEL_WEIGHTS  = MODEL_EXPORT_DIR / "audio_model.pth"    # audio-only model
-LABEL_MAP_PATH       = MODEL_EXPORT_DIR / "label_map.json"
-REF_STATS_PATH       = MODEL_EXPORT_DIR / "reference_stats.pkl"
-MODEL_CONFIG         = MODEL_EXPORT_DIR / "model_config.json"
-HF_CACHE_DIR         = MODEL_EXPORT_DIR / "hf_cache"
-MP_MODELS_DIR        = MODEL_EXPORT_DIR / "mp_models"
-
-# Which model the predictor loads.
-# "audio_only" (default) — fast, audio + noise reduction only, no MediaPipe.
-# "fusion"               — full audio + video cross-attention model.
-MODEL_TYPE = os.getenv("MODEL_TYPE", "audio_only")
+MODEL_WEIGHTS   = MODEL_EXPORT_DIR / "model.pth"
+LABEL_MAP_PATH  = MODEL_EXPORT_DIR / "label_map.json"
+REF_STATS_PATH  = MODEL_EXPORT_DIR / "reference_stats.pkl"
+MODEL_CONFIG    = MODEL_EXPORT_DIR / "model_config.json"
+HF_CACHE_DIR    = MODEL_EXPORT_DIR / "hf_cache"
+MP_MODELS_DIR   = MODEL_EXPORT_DIR / "mp_models"
 
 # Scratch space for ffmpeg output. Uses the OS temp dir so this works on
 # Windows as well as Linux containers.
@@ -70,28 +64,18 @@ MEDIAPIPE_ASSETS = {
 
 
 def ensure_model_assets():
-    """Ensure required model files are present, downloading from HF Hub if not.
+    """Ensure model.pth and reference_stats.pkl are present.
 
-    Files fetched depends on MODEL_TYPE:
-      - Always: label_map.json, reference_stats.pkl
-      - audio_only: audio_model.pth
-      - fusion:     model.pth
-
-    Raises FileNotFoundError if the primary weights file cannot be obtained.
+    Downloads missing files from Hugging Face Hub on first run.
+    Requires HF_REPO_ID and HF_TOKEN environment variables to be set.
+    Raises FileNotFoundError if model.pth cannot be obtained (the server
+    cannot serve predictions without it).
     """
     MODEL_EXPORT_DIR.mkdir(parents=True, exist_ok=True)
-
-    # Choose which weights file to require based on MODEL_TYPE
-    if MODEL_TYPE == "audio_only":
-        weights_file = {"audio_model.pth": AUDIO_MODEL_WEIGHTS}
-    else:
-        weights_file = {"model.pth": MODEL_WEIGHTS}
-
     required_files = {
-        **weights_file,
+        "model.pth": MODEL_WEIGHTS,
         "reference_stats.pkl": REF_STATS_PATH,
     }
-
     missing = [
         name for name, path in required_files.items()
         if not path.exists() or path.stat().st_size == 0
@@ -124,11 +108,10 @@ def ensure_model_assets():
             log.info("Saved %s -> %s (%d bytes)", name, dest, dest.stat().st_size)
     except Exception as exc:
         log.error("HuggingFace download failed: %s", exc, exc_info=True)
-        primary = "audio_model.pth" if MODEL_TYPE == "audio_only" else "model.pth"
-        if primary in missing:
+        if "model.pth" in missing:
             raise FileNotFoundError(
-                f"{primary} not found at {required_files[primary]} and could not be "
-                f"downloaded from {repo_id}. Check HF_REPO_ID and HF_TOKEN."
+                f"model.pth not found at {MODEL_WEIGHTS} and could not be downloaded "
+                f"from {repo_id}. Check HF_REPO_ID and HF_TOKEN on Render."
             ) from exc
 
 
