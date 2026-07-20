@@ -74,3 +74,6 @@ Thumbs.db
 *.bat
 commands.txt
 *.pdf
+
+# ── One-shot HF upload scripts (contain hardcoded tokens) ─────────────────────
+upload_*.py
