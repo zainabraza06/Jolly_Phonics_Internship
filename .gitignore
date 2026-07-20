@@ -69,3 +69,7 @@ sound_data_collection/
 Thumbs.db
 *.swp
 *.swo
+
+# ── Local runner scripts / files ──────────────────────────────────────────────
+*.bat
+commands.txt
