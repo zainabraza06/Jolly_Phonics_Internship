@@ -657,70 +657,29 @@
 
     /* ── DEPLOYMENT SECTION ── */
     .deploy-section {
-      padding: 7rem 10%;
+      padding: 6rem 5%;
       background: linear-gradient(135deg, #091C35 0%, var(--color-primary-dark) 100%);
       color: white;
-      display: grid;
-      grid-template-columns: 1fr 1.1fr;
-      align-items: center;
-      gap: 5rem;
+      text-align: center;
+    }
+    .deploy-content {
+      max-width: 1100px;
+      margin: 0 auto;
     }
     .deploy-content h2 {
       font-family: var(--font-display);
       font-size: 2.75rem;
-      margin-bottom: 1.5rem;
+      margin-bottom: 0;
       line-height: 1.2;
-    }
-    .deploy-content p {
-      font-size: 1.15rem;
-      color: rgba(255,255,255,0.8);
-      margin-bottom: 2rem;
-    }
-    .deploy-cards {
-      display: flex;
-      flex-direction: column;
-      gap: 1.5rem;
-    }
-    .deploy-card {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: var(--radius-md);
-      padding: 28px;
-      display: flex;
-      align-items: flex-start;
-      gap: 20px;
-      transition: var(--transition-smooth);
-    }
-    .deploy-card:hover {
-      background: rgba(255, 255, 255, 0.08);
-      border-color: rgba(255, 255, 255, 0.2);
-    }
-    .deploy-badge {
-      background-color: var(--color-accent-blue);
-      color: white;
-      padding: 4px 10px;
-      border-radius: 4px;
-      font-size: 0.7rem;
-      font-weight: 700;
-      text-transform: uppercase;
-    }
-    .deploy-card-details h3 {
-      font-family: var(--font-display);
-      font-size: 1.25rem;
-      margin-bottom: 6px;
-    }
-    .deploy-card-details p {
-      font-size: 0.9rem;
-      color: rgba(255,255,255,0.65);
-      margin: 0;
     }
 
     /* ── AWS FLOW DIAGRAM ── */
     .aws-flow {
       display: flex;
       align-items: center;
+      justify-content: center;
       gap: 12px;
-      margin-top: 2.5rem;
+      margin-top: 3rem;
       flex-wrap: wrap;
     }
     .aws-flow-node {
@@ -791,7 +750,7 @@
 
     /* ── RESPONSIVE DESIGN ── */
     @media (max-width: 1024px) {
-      .hero, .what-is, .deploy-section {
+      .hero, .what-is {
         grid-template-columns: 1fr;
         gap: 3rem;
       }
@@ -949,25 +908,40 @@
   <!-- FEATURES GRID -->
   <section class="features" id="features">
     <div class="features-header">
-      <h2>The core technologies powering JollyPhonics</h2>
-      <p>By shifting computational load dynamically, we support instant web analysis without heavy container initialization costs.</p>
+      <h2>Everything powering JollyPhonics</h2>
+      <p>A full-stack multi-modal AI pipeline built for real-time classroom use.</p>
     </div>
-    
+
     <div class="features-grid">
       <div class="feature-card">
         <div class="feature-icon">🎙️</div>
-        <h3>Whisper Encoder</h3>
-        <p>Utilizes a softmax-weighted sum across layers [1, 3, 5, 7, 9] of the Whisper-small encoder, isolating acoustic properties directly from raw audio waveforms.</p>
+        <h3>Whisper Acoustic Encoder</h3>
+        <p>Extracts speech embeddings using a softmax-weighted sum across layers [1, 3, 5, 7, 9] of OpenAI Whisper-small, capturing phoneme-level acoustic properties directly from raw waveforms — no manual feature engineering.</p>
       </div>
       <div class="feature-card">
-        <div class="feature-icon">✨</div>
-        <h3>MediaPipe Vision</h3>
-        <p>Extracts 234-dimensional joint arrays representing mouth boundaries, poses, and hands, enabling fine-grained posture tracking.</p>
+        <div class="feature-icon">✋</div>
+        <h3>MediaPipe Joint Tracking</h3>
+        <p>Tracks 234-dimensional joint coordinate arrays per video frame: 30 mouth contour points, 6 pose landmarks (shoulders, elbows, wrists), and full hand keypoints — all body-relative normalized to the shoulder midpoint.</p>
       </div>
       <div class="feature-card">
         <div class="feature-icon">⚡</div>
         <h3>Cross-Attention Fusion</h3>
-        <p>Fuses sequence modalities at the latent layer via Cross-Attention layers, mapping sound parameters directly to physical actions.</p>
+        <p>A custom transformer cross-attention block fuses the audio token sequence with the video frame sequence at the latent layer, letting each modality attend to and calibrate the other before final classification.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <h3>Reference-Calibrated Scoring</h3>
+        <p>Every phoneme has a stored reference distribution (mean + covariance) built from validated adult demonstrator recordings. A Mahalanobis distance gives a percentile closeness score per attempt — not just pass/fail.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📱</div>
+        <h3>React Native Mobile App</h3>
+        <p>An Expo-based cross-platform mobile app lets teachers and children record attempts directly from phone cameras. Scores appear in real-time with animated feedback rings, phoneme chips, and mismatch explanations.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🌐</div>
+        <h3>Next.js Web Dashboard</h3>
+        <p>A full server-side rendered Next.js frontend provides class-level analytics, per-child score history, and phoneme-by-phoneme progress tracking — all consuming the same FastAPI REST backend as the mobile app.</p>
       </div>
     </div>
   </section>
@@ -1063,8 +1037,7 @@
   <!-- DEPLOYMENT AND ARCHITECTURE SECTION -->
   <section class="deploy-section" id="deploy">
     <div class="deploy-content">
-      <h2>Enterprise AWS Cloud Architecture</h2>
-      <p>JollyPhonics runs on a fully managed AWS infrastructure stack. The backend API is containerized and deployed on <strong style="color: var(--color-primary-light);">AWS Elastic Beanstalk</strong>, model assets stream in from <strong style="color: var(--color-primary-light);">Hugging Face Hub</strong> on first boot, and static frontends are served globally via <strong style="color: var(--color-primary-light);">CloudFront CDN</strong>.</p>
+      <h2>Cloud Infrastructure</h2>
 
       <!-- AWS Architecture Flow Diagram -->
       <div class="aws-flow">
@@ -1073,47 +1046,24 @@
           <div class="aws-node-label">Expo Mobile<br><span>React Native</span></div>
         </div>
         <div class="aws-flow-arrow">→</div>
+        <div class="aws-flow-node">
+          <div class="aws-node-icon">🌐</div>
+          <div class="aws-node-label">Next.js Web<br><span>CloudFront CDN</span></div>
+        </div>
+        <div class="aws-flow-arrow">→</div>
         <div class="aws-flow-node aws-node-highlight">
           <div class="aws-node-icon">☁️</div>
-          <div class="aws-node-label">API Gateway<br><span>AWS EB · us-east-1</span></div>
+          <div class="aws-node-label">FastAPI Backend<br><span>AWS EB · us-east-1</span></div>
+        </div>
+        <div class="aws-flow-arrow">→</div>
+        <div class="aws-flow-node">
+          <div class="aws-node-icon">🐳</div>
+          <div class="aws-node-label">Docker Image<br><span>ECR Registry</span></div>
         </div>
         <div class="aws-flow-arrow">→</div>
         <div class="aws-flow-node">
           <div class="aws-node-icon">🤗</div>
-          <div class="aws-node-label">Model Hub<br><span>HuggingFace</span></div>
-        </div>
-      </div>
-    </div>
-    
-    <div class="deploy-actions-wrap">
-      <div class="deploy-cards">
-        <div class="deploy-card">
-          <div class="deploy-badge" style="background: #FF9900; color: #000;">AWS EB</div>
-          <div class="deploy-card-details">
-            <h3>Elastic Beanstalk · Python 3.10</h3>
-            <p>FastAPI backend auto-scaled inside an EB environment. Zero-downtime rolling deployments with health-check endpoints and environment variable injection via EB configuration.</p>
-          </div>
-        </div>
-        <div class="deploy-card">
-          <div class="deploy-badge" style="background: #FF9900; color: #000;">ECR</div>
-          <div class="deploy-card-details">
-            <h3>Elastic Container Registry</h3>
-            <p>Docker image built via GitHub Actions CI pipeline and pushed to ECR, then pulled automatically by Elastic Beanstalk on each deployment.</p>
-          </div>
-        </div>
-        <div class="deploy-card">
-          <div class="deploy-badge">HuggingFace</div>
-          <div class="deploy-card-details">
-            <h3>zainabraza06/phenome_classfication</h3>
-            <p>Model weights (.pth) and calibration distributions (.pkl) downloaded on-demand at first lifecycle hook via <code style="font-size:0.8rem; background:rgba(255,255,255,0.1); padding: 1px 5px; border-radius:3px;">hf_hub_download</code>.</p>
-          </div>
-        </div>
-        <div class="deploy-card">
-          <div class="deploy-badge" style="background: #FF9900; color: #000;">CloudFront</div>
-          <div class="deploy-card-details">
-            <h3>Global CDN · Next.js Frontend</h3>
-            <p>Static Next.js build deployed to S3 and distributed worldwide via CloudFront, ensuring sub-50ms TTFB for all classroom users.</p>
-          </div>
+          <div class="aws-node-label">Model Weights<br><span>HuggingFace Hub</span></div>
         </div>
       </div>
     </div>
