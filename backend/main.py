@@ -26,6 +26,7 @@ from fastapi.responses import JSONResponse
 from config import settings
 from phonics import PhonemeGesturePredictor
 from phonics import labels as label_map
+from phonics.config import ensure_model_assets
 
 logging.basicConfig(
     level=logging.INFO,
@@ -48,6 +49,7 @@ def get_predictor() -> PhonemeGesturePredictor:
     """Load the model on first use so import stays cheap and startup fast."""
     global _predictor
     if _predictor is None:
+        ensure_model_assets()   # downloads model.pth / reference_stats.pkl if missing
         log.info("loading fusion model ...")
         _predictor = PhonemeGesturePredictor()
     return _predictor

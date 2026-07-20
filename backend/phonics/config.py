@@ -8,8 +8,11 @@ apart silently.
 """
 
 import json
+import logging
 import os
 from pathlib import Path
+
+log = logging.getLogger(__name__)
 
 # --- feature geometry (must match training) ---------------------------------
 WHISPER_MODEL     = "openai/whisper-small"
@@ -62,38 +65,66 @@ MEDIAPIPE_ASSETS = {
 
 def ensure_model_assets():
     """Ensure model.pth and reference_stats.pkl are present.
-    If missing, downloads them from Hugging Face Hub.
+
+    Downloads missing files from Hugging Face Hub on first run.
+    Requires HF_REPO_ID and HF_TOKEN environment variables to be set.
+    Raises FileNotFoundError if model.pth cannot be obtained (the server
+    cannot serve predictions without it).
     """
     MODEL_EXPORT_DIR.mkdir(parents=True, exist_ok=True)
     required_files = {
         "model.pth": MODEL_WEIGHTS,
         "reference_stats.pkl": REF_STATS_PATH,
     }
-    missing = [name for name, path in required_files.items() if not path.exists() or path.stat().st_size == 0]
-    if missing:
-        repo_id = os.getenv("HF_REPO_ID", "zainabraza06/phenome_classfication")
-        token = os.getenv("HF_TOKEN")
-        print(f"Downloading missing model assets {missing} from Hugging Face Hub: {repo_id}...")
-        try:
-            from huggingface_hub import hf_hub_download
-            import shutil
-            for name in missing:
-                dest = required_files[name]
-                temp_path = hf_hub_download(
-                    repo_id=repo_id,
-                    filename=name,
-                    token=token,
-                    cache_dir=str(HF_CACHE_DIR)
-                )
-                shutil.copy(temp_path, dest)
-                print(f"Successfully downloaded and copied {name} to {dest}")
-        except Exception as e:
-            print(f"Failed to download from Hugging Face Hub: {e}")
-            if "model.pth" in missing:
-                raise FileNotFoundError(
-                    f"Could not load required model weights model.pth locally or from Hugging Face Hub. "
-                    "Please verify HF_REPO_ID is correct and the file exists."
-                ) from e
+    missing = [
+        name for name, path in required_files.items()
+        if not path.exists() or path.stat().st_size == 0
+    ]
+    if not missing:
+        return  # all assets already on disk
+
+    repo_id = os.getenv("HF_REPO_ID", "zainabraza06/phenome_classfication")
+    token   = os.getenv("HF_TOKEN")
+
+    if not token:
+        log.warning(
+            "HF_TOKEN env var is not set -- attempting anonymous download from %s. "
+            "Set HF_TOKEN on Render if the repo is private.", repo_id)
+
+    log.info("Downloading missing model assets %s from HF Hub: %s", missing, repo_id)
+    try:
+        import shutil
+        from huggingface_hub import hf_hub_download
+        for name in missing:
+            dest = required_files[name]
+            log.info("Fetching %s ...", name)
+            temp_path = hf_hub_download(
+                repo_id=repo_id,
+                filename=name,
+                token=token,
+                cache_dir=str(HF_CACHE_DIR),
+            )
+            shutil.copy(temp_path, dest)
+            log.info("Saved %s -> %s (%d bytes)", name, dest, dest.stat().st_size)
+    except Exception as exc:
+        log.error("HuggingFace download failed: %s", exc, exc_info=True)
+        if "model.pth" in missing:
+            raise FileNotFoundError(
+                f"model.pth not found at {MODEL_WEIGHTS} and could not be downloaded "
+                f"from {repo_id}. Check HF_REPO_ID and HF_TOKEN on Render."
+            ) from exc
+
+
+# Pull assets at import time so they are ready before the predictor
+# instantiates -- avoids a race between the first /predict/ request
+# arriving and the download completing.
+try:
+    ensure_model_assets()
+except FileNotFoundError:
+    log.critical(
+        "Model weights unavailable at startup. "
+        "Set HF_REPO_ID and HF_TOKEN on Render and redeploy."
+    )
 
 
 def load_model_config() -> dict:
@@ -103,7 +134,7 @@ def load_model_config() -> dict:
     geometry than this code produces, which yields confident nonsense
     rather than an error -- so it is worth surfacing loudly.
     """
-    ensure_model_assets()
+    ensure_model_assets()  # no-op if files already present
     if not MODEL_CONFIG.exists():
         return {}
     with open(MODEL_CONFIG) as fh:
