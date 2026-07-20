@@ -4,6 +4,8 @@ import torch
 import torch.nn.functional as F
 import numpy as np
 import os
+import shutil
+import tempfile
 from sklearn.preprocessing import LabelEncoder
 
 from sound_model import PhonemeClassifier, Config
@@ -75,20 +77,18 @@ def predict_single_audio(feature_tensor):
 # ==== API Endpoint ====
 @app.post("/predict/")
 async def predict_audio(file: UploadFile = File(...)):
+    workdir = tempfile.mkdtemp(prefix="phonics_tmp_")
     try:
-        UPLOAD_DIR = "uploaded_audios"
-        os.makedirs(UPLOAD_DIR, exist_ok=True)
-
-        file_path = os.path.join(UPLOAD_DIR, file.filename)
+        file_path = os.path.join(workdir, file.filename or "upload.wav")
 
         with open(file_path, "wb") as f:
             f.write(await file.read())
 
-        print(f"✅ File saved at: {file_path}")
+        print(f"File saved at temp path: {file_path}")
 
         # Feature extraction
         features = feature_extractor.extract(file_path)
-        print(f"✅ Features extracted. Shape: {features.shape}")
+        print(f"Features extracted. Shape: {features.shape}")
 
         # Prediction
         top_label, top_prob, all_probs = predict_single_audio(features)
@@ -105,8 +105,11 @@ async def predict_audio(file: UploadFile = File(...)):
         return JSONResponse(content=result)
 
     except Exception as e:
-        print(f"❌ Error: {e}")
+        print(f"Error: {e}")
         return JSONResponse(status_code=500, content={"error": str(e)})
+    finally:
+        file.file.close()
+        shutil.rmtree(workdir, ignore_errors=True)
 
 # ==== Run the app ====
 if __name__ == "__main__":
