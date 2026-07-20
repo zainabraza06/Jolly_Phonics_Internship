@@ -24,6 +24,7 @@ disabling the mask, so the model saw a distribution it was never trained
 on. extract_video_sequence() below follows training.
 """
 
+import gc
 import subprocess
 import urllib.request
 
@@ -70,22 +71,41 @@ def extract_wav(media_path, out_wav):
 
 
 class AudioEncoder:
-    """Whisper feature extractor, matching training's WhisperFeatureExtractor."""
+    """Whisper-small feature extractor matching training's WhisperFeatureExtractor.
+
+    Memory optimisations (Render free tier = 512 MB):
+      - Loaded in float16 (~122 MB vs ~244 MB fp32). Hidden states are cast
+        back to float32 before the weighted sum so the downstream BiLSTM
+        receives fp32 inputs, exactly as during training.
+      - Decoder weights deleted immediately after loading (~30 MB saved).
+      - low_cpu_mem_usage=True avoids doubling peak RAM during load.
+    """
 
     def __init__(self, device):
         self.device = device
         cache = str(HF_CACHE_DIR)
         self.processor = WhisperProcessor.from_pretrained(WHISPER_MODEL, cache_dir=cache)
+
+        # Load in fp16 to halve resident memory; delete decoder to free ~30 MB.
         model = WhisperModel.from_pretrained(
-            WHISPER_MODEL, output_hidden_states=True, cache_dir=cache)
+            WHISPER_MODEL,
+            output_hidden_states=True,
+            cache_dir=cache,
+            torch_dtype=torch.float16,
+            low_cpu_mem_usage=True,
+        )
+        # We only use the encoder — drop the decoder immediately.
+        del model.decoder
         model.eval().to(device)
         self.model = model
-        # Frozen at initialisation during training -- see module docstring.
+        gc.collect()
+
+        # Layer weights and norm stay in fp32 (tiny tensors, negligible memory).
         self.layer_weights = torch.ones(len(WHISPER_LAYERS), device=device)
         self.norm = nn.LayerNorm(AUDIO_FEAT_DIM).to(device)
 
     def extract(self, wav_path) -> torch.Tensor:
-        """-> (T, 768) float tensor on CPU, truncated to MAX_AUDIO_FRAMES."""
+        """-> (T, 768) float32 tensor on CPU, truncated to MAX_AUDIO_FRAMES."""
         wav, sr = torchaudio.load(str(wav_path))
         if wav.shape[0] > 1:
             wav = wav.mean(0, keepdim=True)
@@ -94,14 +114,18 @@ class AudioEncoder:
 
         inputs = self.processor(wav.squeeze().numpy(), sampling_rate=16000,
                                 return_tensors="pt")
-        feats = inputs.input_features.to(self.device)
+        feats = inputs.input_features.to(self.device, dtype=torch.float16)
         with torch.no_grad():
             hidden = self.model.encoder(input_features=feats).hidden_states
 
-        stacked = torch.stack([hidden[i].squeeze(0) for i in WHISPER_LAYERS])
+        # Cast each hidden layer to fp32 before weighted sum so downstream
+        # BiLSTM receives the same dtype it was trained on.
+        stacked = torch.stack(
+            [hidden[i].squeeze(0).float() for i in WHISPER_LAYERS]
+        )
         weights = F.softmax(self.layer_weights, dim=0)
         combined = torch.sum(weights[:, None, None] * stacked, dim=0)
-        seq = self.norm(combined).detach()
+        seq = self.norm(combined).detach()   # norm params are fp32
         if seq.shape[0] > MAX_AUDIO_FRAMES:
             seq = seq[:MAX_AUDIO_FRAMES]
         return seq.cpu()

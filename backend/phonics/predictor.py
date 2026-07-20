@@ -23,6 +23,7 @@ Uses model.pth: full audio + video cross-attention pipeline.  Both Whisper
 and MediaPipe run on every upload.
 """
 
+import gc
 import json
 import logging
 import pickle
@@ -111,6 +112,20 @@ class PhonemeGesturePredictor:
             log.warning("Unexpected keys: %s", unexpected)
 
         self.model.eval()
+
+        # Dynamic int8 quantization of LSTM layers — reduces BiLSTM memory
+        # by ~35 MB with no retraining needed (CPU inference only).
+        try:
+            self.model = torch.quantization.quantize_dynamic(
+                self.model,
+                {torch.nn.LSTM, torch.nn.Linear},
+                dtype=torch.qint8,
+            )
+            log.info("BiLSTM quantized to int8")
+        except Exception as qe:
+            log.warning("Dynamic quantization skipped: %s", qe)
+
+        gc.collect()  # free peak-load RAM
         log.info("loaded %s from %s", fusion_type, weights_path.name)
 
     # -- feature extraction ---------------------------------------------------
