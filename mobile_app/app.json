@@ -1,21 +1,32 @@
 {
   "expo": {
-    "name": "JollyPhonics",
-    "slug": "jollyphonics-tester",
+    "name": "Jholly Phonics",
+    "slug": "jholly-phonics",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
+    "newArchEnabled": true,
     "splash": {
-      "backgroundColor": "#2D479D"
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "jsEngine": "jsc"   
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#2D479D"
-      }
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "edgeToEdgeEnabled": true,
+      "jsEngine": "jsc"    
     },
-    "plugins": [
-      "expo-document-picker"
-    ]
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "jsEngine": "jsc"      
   }
 }
