@@ -134,7 +134,7 @@ Padding is handled with attention masks throughout: the true (unpadded) sequence
 
 ### Audio branch
 
-- **Whisper features** ([features.py](backend/phonics/features.py)) — a softmax-weighted sum over hidden layers `[1, 3, 5, 7, 9]` of `openai/whisper-small`, followed by LayerNorm, giving a 768-dim sequence of up to 200 frames. The layer weights and LayerNorm were **frozen at their initial values during training**, so they are reconstructed exactly here, not approximated. Whisper is loaded in **fp16** and its decoder is deleted after loading to fit Render's 512 MB free tier; hidden states are cast back to fp32 before the weighted sum, matching training.
+- **Whisper features** ([features.py](backend/phonics/features.py)) — a softmax-weighted sum over hidden layers `[1, 3, 5, 7, 9]` of `openai/whisper-small`, followed by LayerNorm, giving a 768-dim sequence of up to 200 frames. The layer weights and LayerNorm were **frozen at their initial values during training**, so they are reconstructed exactly here, not approximated. Whisper is loaded in **fp16** and its decoder is deleted after loading to keep the resident footprint small enough for 512 MB-class instances; hidden states are cast back to fp32 before the weighted sum, matching training.
 - **Audio BiLSTM encoder** — 2-layer bidirectional LSTM (hidden 512, dropout 0.5) with LayerNorm and additive attention pooling. Sequence output dim 1024.
 
 ### Video branch
@@ -232,9 +232,6 @@ jollyphonics/
 │   ├── config.py                  # API settings, CORS whitelist
 │   ├── run.py                     # uvicorn bootrunner
 │   ├── Dockerfile                 # python:3.10-slim + ffmpeg
-│   ├── procfile                   # process definition for PaaS hosts
-│   ├── render.yaml                # Render blueprint (backend-scoped copy)
-│   ├── runtime.txt                # pinned Python version
 │   ├── requirements.txt           # dependency ranges
 │   ├── requirements-lock.txt      # exact resolved versions (known-good env)
 │   ├── utils/
@@ -283,7 +280,6 @@ jollyphonics/
 │   ├── train.py                   # training script
 │   └── evaluate_and_export.py     # evaluate + export model/config/reference stats
 │
-├── render.yaml                    # root Render blueprint (baseDir: backend)
 ├── upload_fusion_to_hf.py         # push fusion assets to Hugging Face Hub
 ├── upload_audio_model_to_hf.py    # push audio-only assets to HF Hub
 └── run.bat / start_*.bat          # Windows dev helpers
@@ -295,7 +291,7 @@ jollyphonics/
 
 ### Prerequisites
 
-- **Python 3.11 or 3.12** (the Docker image pins 3.10 for Render compatibility)
+- **Python 3.11 or 3.12** (the Docker image pins 3.10)
 - **ffmpeg** on `PATH` — a system package, not a pip install
 - ~2 GB free disk for Whisper and the checkpoint
 
@@ -439,7 +435,7 @@ curl -X POST "http://127.0.0.1:8000/predict/" \
 
 | Variable | Default | Purpose |
 |---|---|---|
-| `PORT` | `8000` | Listen port (Render injects this) |
+| `PORT` | `8000` | Listen port (most hosts inject this) |
 | `HF_REPO_ID` | `zainabraza06/phenome_classfication` | Hugging Face repo holding the model assets |
 | `HF_TOKEN` | — | Required only if that repo is private |
 | `PHONICS_MODEL_DIR` | `backend/models` | Where model assets live |
@@ -461,23 +457,24 @@ Safe defaults are hardcoded in [backend/config.py](backend/config.py): `localhos
 
 ## Deployment
 
-### Render (blueprint)
+### Backend (Docker)
 
-The root [render.yaml](render.yaml) defines the service with `baseDir: backend`:
-
-1. Push the repo to GitHub.
-2. Render dashboard → **Blueprints** → **New Blueprint Instance** → select the repo.
-3. Render picks up `render.yaml`: Python runtime, `pip install -r requirements.txt`, `uvicorn main:app --host 0.0.0.0 --port $PORT`.
-4. Set `HF_TOKEN` manually in the dashboard if the model repo is private (it is marked `sync: false`).
-
-### Docker
+The backend ships as a container — [backend/Dockerfile](backend/Dockerfile) is the single source of truth for how it is built and started.
 
 ```bash
 docker build -t jollyphonics-backend backend/
 docker run -p 8000:8000 -e PORT=8000 jollyphonics-backend
 ```
 
-The image is `python:3.10-slim` with `ffmpeg`, `libsm6` and `libxext6` installed for OpenCV and MediaPipe.
+The image is `python:3.10-slim` with `ffmpeg`, `libsm6` and `libxext6` installed for OpenCV and MediaPipe. It listens on `$PORT` (default `10000` in the image, overridden above).
+
+Whatever host runs the image needs:
+
+- `HF_TOKEN` set if the model repo is private, so `ensure_model_assets()` can pull `model.pth` and `reference_stats.pkl` on first boot
+- enough memory for Whisper-small plus the fusion checkpoint (see the fp16/decoder-deletion notes under [Audio branch](#audio-branch))
+- a writable temp directory for ffmpeg scratch output
+
+Mounting a persistent volume at `PHONICS_MODEL_DIR` avoids re-downloading the model assets on every container start.
 
 ### Frontend
 
@@ -485,7 +482,12 @@ The web app deploys to Vercel; `https://jolly-phonics-internship.vercel.app` is 
 
 ### Cold starts
 
-On Render's free tier the service sleeps after 15 minutes of inactivity. The first request after a wake re-downloads model assets from Hugging Face — expect **30–45 seconds**. Subsequent requests are fast.
+On a cold container the first request pays for downloading the model assets from Hugging Face and loading the model — expect roughly **30–45 seconds**. Subsequent requests are fast. Two ways to avoid it:
+
+- persist `PHONICS_MODEL_DIR` across restarts so the assets are already on disk
+- set `PHONICS_EAGER_LOAD=1` so the model loads at startup rather than on the first request
+
+On hosts that idle-stop containers, both of these are paid again after each wake.
 
 ---
 

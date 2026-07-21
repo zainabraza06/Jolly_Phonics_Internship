@@ -89,7 +89,7 @@ def ensure_model_assets():
     if not token:
         log.warning(
             "HF_TOKEN env var is not set -- attempting anonymous download from %s. "
-            "Set HF_TOKEN on Render if the repo is private.", repo_id)
+            "Set HF_TOKEN if the repo is private.", repo_id)
 
     log.info("Downloading missing model assets %s from HF Hub: %s", missing, repo_id)
     try:
@@ -111,7 +111,7 @@ def ensure_model_assets():
         if "model.pth" in missing:
             raise FileNotFoundError(
                 f"model.pth not found at {MODEL_WEIGHTS} and could not be downloaded "
-                f"from {repo_id}. Check HF_REPO_ID and HF_TOKEN on Render."
+                f"from {repo_id}. Check HF_REPO_ID and HF_TOKEN."
             ) from exc
 
 
@@ -123,7 +123,7 @@ try:
 except FileNotFoundError:
     log.critical(
         "Model weights unavailable at startup. "
-        "Set HF_REPO_ID and HF_TOKEN on Render and redeploy."
+        "Set HF_REPO_ID and HF_TOKEN and redeploy."
     )
 
 

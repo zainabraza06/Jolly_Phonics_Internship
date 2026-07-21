@@ -69,7 +69,7 @@ def extract_wav(media_path, out_wav):
 class AudioEncoder:
     """Whisper-small feature extractor matching training's WhisperFeatureExtractor.
 
-    Memory optimisations (Render free tier = 512 MB):
+    Memory optimisations (kept for small/512 MB-class instances):
       - Loaded in float16 (~122 MB vs ~244 MB fp32). Hidden states are cast
         back to float32 before the weighted sum so the downstream BiLSTM
         receives fp32 inputs, exactly as during training.

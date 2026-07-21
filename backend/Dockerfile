@@ -1,4 +1,4 @@
-# Use Python 3.10 slim (Render requires <3.11 and torch works fine on 3.10)
+# Python 3.10 slim -- torch and the rest of the stack are known-good on it
 FROM python:3.10-slim
 
 # Prevent Python from writing pyc files and buffer logs
@@ -23,7 +23,7 @@ RUN pip install -r requirements.txt
 # Copy project files
 COPY . .
 
-# Expose port (Render uses 10000 by default)
+# Default port; override with the PORT env var at run time
 EXPOSE 10000
 
 # Command to run app with Uvicorn
